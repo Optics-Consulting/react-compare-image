@@ -19,9 +19,30 @@ interface IProps {
   sliderLineWidth?: number;
   sliderPositionPercentage?: number;
   vertical?: boolean;
+  loadingStrategy?: 'lazy' | 'eager';
 }
 
-const ReactCompareImage: React.FC<IProps> = (props: IProps) => {
+const defaultProps = {
+  aspectRatio: 'taller',
+  handle: null,
+  handleSize: 40,
+  hover: false,
+  leftImageAlt: '',
+  leftImageCss: {},
+  leftImageLabel: null,
+  onSliderPositionChange: () => {},
+  rightImageAlt: '',
+  rightImageCss: {},
+  rightImageLabel: null,
+  skeleton: null,
+  sliderLineColor: '#ffffff',
+  sliderLineWidth: 2,
+  sliderPositionPercentage: 0.5,
+  vertical: false,
+  loadingStrategy: 'lazy'
+};
+
+const ReactCompareImage: React.FC<IProps> = props => {
   const {
     aspectRatio = 'taller',
     handle = null,
@@ -33,14 +54,15 @@ const ReactCompareImage: React.FC<IProps> = (props: IProps) => {
     leftImageLabel = null,
     onSliderPositionChange = () => {},
     rightImage,
-    rightImageAlt = '',
-    rightImageCss = {},
-    rightImageLabel = null,
-    skeleton = null,
-    sliderLineColor = '#ffffff',
-    sliderLineWidth = 2,
-    sliderPositionPercentage = 0.5,
-    vertical = false,
+    rightImageAlt,
+    rightImageCss,
+    rightImageLabel,
+    skeleton,
+    sliderLineColor,
+    sliderLineWidth,
+    sliderPositionPercentage,
+    vertical,
+    loadingStrategy,
   } = props;
 
   const horizontal = !vertical;
@@ -170,7 +192,7 @@ const ReactCompareImage: React.FC<IProps> = (props: IProps) => {
       // it's necessary to reset event handlers each time the canvasWidth changes
 
       // for mobile
-      containerElement.addEventListener('touchstart', startSliding); // 01
+      containerElement.addEventListener('touchstart', startSliding, {passive: true}); // 01
       window.addEventListener('touchend', finishSliding); // 02
 
       // for desktop
@@ -201,7 +223,7 @@ const ReactCompareImage: React.FC<IProps> = (props: IProps) => {
 
     return () => {
       // cleanup all event resteners
-      containerElement.removeEventListener('touchstart', startSliding); // 01
+      containerElement.removeEventListener('touchstart', startSliding, {passive: true}); // 01
       window.removeEventListener('touchend', finishSliding); // 02
       containerElement.removeEventListener('mousemove', handleSliding); // 03
       containerElement.removeEventListener('mouseleave', finishSliding); // 04
@@ -374,14 +396,17 @@ const ReactCompareImage: React.FC<IProps> = (props: IProps) => {
       >
         <img
           onLoad={() => setRightImgLoaded(true)}
+          loading={loadingStrategy}
           alt={rightImageAlt}
           data-testid="right-image"
           ref={rightImageRef}
           src={rightImage}
+
           style={styles.rightImage}
         />
         <img
           onLoad={() => setLeftImgLoaded(true)}
+          loading={loadingStrategy}
           alt={leftImageAlt}
           data-testid="left-image"
           ref={leftImageRef}
